@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,7 +15,7 @@ public class PlayerController : MonoBehaviour
         _rb.freezeRotation = true;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         Movement();
     }
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
         float verticalInput = Input.GetAxisRaw("Vertical");
         
         Vector3 movement = Vector3.zero;
+        movement.Normalize();
         int movementDirection = 0;
 
         if (verticalInput > 0)
