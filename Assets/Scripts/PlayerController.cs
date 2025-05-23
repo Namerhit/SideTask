@@ -6,54 +6,49 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float speed;
+    [SerializeField] private Vector3 _offset;
+
+    [SerializeField] private Camera _mainCamera;
+    
     private Rigidbody _rb;
     private Animator _animator;
-    void Start()
+    private void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
         _rb.freezeRotation = true;
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         Movement();
     }
 
-    void Movement()
+    private void Movement()
     {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
-        
-        Vector3 movement = Vector3.zero;
-        movement.Normalize();
-        int movementDirection = 0;
+        var horizontalInput = Input.GetAxisRaw("Horizontal");
+        var verticalInput = Input.GetAxisRaw("Vertical");
 
-        if (verticalInput > 0)
+        var inputDirection = new Vector3(horizontalInput, 0f, verticalInput);
+
+        if (inputDirection.magnitude > 0.01f)
         {
-            movement.z = 1;
-            movementDirection = 1;
-        }
-        else if(verticalInput < 0)
-        {
-            movement.z = -1;
-            movementDirection = 2;
-        }
-        else if(horizontalInput > 0)
-        {
-            movement.x = 1;
-            movementDirection = 3;
-        }
-        else if (horizontalInput < 0)
-        {
-            movement.x = -1;
-            movementDirection = 4;
+
+            var movementDirection = inputDirection.normalized;
+
+            _rb.velocity = new Vector3(movementDirection.x * speed, _rb.velocity.y, movementDirection.z * speed);
+
+            _rb.MoveRotation(Quaternion.LookRotation(movementDirection));
+
+            _animator.SetInteger("MovementDirection", 1);
         }
 
-        Vector3 currentVelocity = speed * movement;
-        currentVelocity.y = _rb.velocity.y;
-        _rb.velocity = currentVelocity;
-        
-        _animator.SetInteger("MovementDirection", movementDirection);
+        else
+        {
+            _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
+            _animator.SetInteger("MovementDirection", 0);
+        }
+
+        _mainCamera.transform.position = transform.position + _offset;
     }
 }
